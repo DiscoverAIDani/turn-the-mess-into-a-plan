@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>Turn the mess into a plan</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <main class="page">
+    <header class="page-heading">
+      <p class="eyebrow"><span class="brand-mark" aria-hidden="true">↗</span> ONE STEP AT A TIME</p>
+      <h1>Turn the mess<br>into a <em>plan.</em></h1>
+      <p class="intro">Put your notes here. Find a clear goal and a place to start.</p>
+    </header>
+    <div class="workspace">
+      <section class="notes-panel" aria-labelledby="notes-heading">
+        <div class="section-heading"><span class="step-label">01</span><h2 id="notes-heading">Start with what’s on your mind</h2></div>
+        <p class="muted">Tasks, appointments, reminders, loose ends.<br>No need to organize them first.</p>
+        <form id="plan-form" novalidate>
+          <label for="notes">Your notes</label>
+          <textarea id="notes" name="notes" rows="12" aria-describedby="notes-help notes-count" placeholder="Call Maya back about missed estimate — urgent.&#10;9:00 AM carpet cleaning.&#10;11:30 AM upholstery job.&#10;Follow up with Jordan.&#10;Post one Facebook update.&#10;Enter today’s payments.&#10;Order supplies sometime this week."></textarea>
+          <div class="input-meta"><span id="notes-help">A little messy is welcome.</span><span id="notes-count">0 / 6,000</span></div>
+          <button class="primary-button" id="make-plan" type="submit"><span id="button-label">Make My Plan</span><span aria-hidden="true">↗</span></button>
+          <p id="request-status" class="request-status" role="status" aria-live="polite"></p>
+          <div id="error-box" class="inline-message" hidden>
+            <p id="error-message" role="alert"></p>
+            <div class="message-actions"><button id="try-again" type="button" class="text-button">Try Again</button><button id="edit-notes" type="button" class="text-button">Edit Notes</button></div>
+          </div>
+        </form>
+        <p class="input-footnote">Your notes are sent to Nebius to create your plan.</p>
+      </section>
+      <section class="results-panel" id="results" aria-labelledby="results-heading" tabindex="-1">
+        <div class="section-heading"><span class="step-label">02</span><h2 id="results-heading">A little more clarity</h2></div>
+        <div id="result-content">
+          <div class="empty-state">
+            <div class="empty-art" aria-hidden="true"><span></span><span></span><span></span><i>✓</i></div>
+            <h3>You don’t have to solve<br>everything at once.</h3>
+            <p>Your goal, priorities, and next steps<br>will appear here.</p>
+            <span class="quiet-rule"></span>
+            <p class="small-copy">One clear next step is a good beginning.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+    <footer>Less to untangle. More room to begin.</footer>
+  </main>
+</body>
+</html>

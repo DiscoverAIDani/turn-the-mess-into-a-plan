@@ -1,0 +1,178 @@
+{
+  "testedAt": "2026-09-27T04:04:15.964Z",
+  "model": "Qwen/Qwen3-30B-A3B-Instruct-2507",
+  "max_tokens": 4096,
+  "timeoutMs": 45000,
+  "cases": [
+    {
+      "name": "business",
+      "passed": true,
+      "latencyMs": 11902,
+      "usage": {
+        "completion_tokens": 406,
+        "prompt_tokens": 431,
+        "total_tokens": 837,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "result": {
+        "kind": "plan",
+        "goal": "Complete urgent follow-ups, manage scheduled jobs, and update records for the day.",
+        "tasks": [
+          {
+            "id": "call-maya-back",
+            "text": "Call Maya back about missed estimate",
+            "appointmentTime": null,
+            "sourceExcerpt": "Call Maya back about missed estimate — urgent."
+          },
+          {
+            "id": "carpet-cleaning",
+            "text": "9:00 AM carpet cleaning",
+            "appointmentTime": "9:00 AM",
+            "sourceExcerpt": "9:00 AM carpet cleaning."
+          },
+          {
+            "id": "upholstery-job",
+            "text": "11:30 AM upholstery job",
+            "appointmentTime": "11:30 AM",
+            "sourceExcerpt": "11:30 AM upholstery job."
+          },
+          {
+            "id": "follow-up-jordan",
+            "text": "Follow up with Jordan",
+            "appointmentTime": null,
+            "sourceExcerpt": "Follow up with Jordan."
+          },
+          {
+            "id": "post-facebook-update",
+            "text": "Post one Facebook update",
+            "appointmentTime": null,
+            "sourceExcerpt": "Post one Facebook update."
+          },
+          {
+            "id": "enter-payments",
+            "text": "Enter today's payments",
+            "appointmentTime": null,
+            "sourceExcerpt": "Enter today's payments."
+          },
+          {
+            "id": "order-supplies",
+            "text": "Order supplies sometime this week",
+            "appointmentTime": null,
+            "sourceExcerpt": "Need to order supplies sometime this week."
+          }
+        ],
+        "priorityTaskIds": [
+          "call-maya-back",
+          "carpet-cleaning",
+          "upholstery-job"
+        ],
+        "attention": []
+      }
+    },
+    {
+      "name": "one-task",
+      "passed": true,
+      "latencyMs": 3690,
+      "usage": {
+        "completion_tokens": 113,
+        "prompt_tokens": 390,
+        "total_tokens": 503,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 368
+        }
+      },
+      "result": {
+        "kind": "plan",
+        "goal": "Follow up with Maya regarding the missed estimate",
+        "tasks": [
+          {
+            "id": "call-maya-about-missed-estimate",
+            "text": "Call Maya back about the missed estimate",
+            "appointmentTime": null,
+            "sourceExcerpt": "Call Maya back about the missed estimate — urgent."
+          }
+        ],
+        "priorityTaskIds": [
+          "call-maya-about-missed-estimate"
+        ],
+        "attention": []
+      }
+    },
+    {
+      "name": "two-tasks",
+      "passed": true,
+      "latencyMs": 4067,
+      "usage": {
+        "completion_tokens": 147,
+        "prompt_tokens": 389,
+        "total_tokens": 536,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 368
+        }
+      },
+      "result": {
+        "kind": "plan",
+        "goal": "Handle urgent follow-ups and daily financial entries",
+        "tasks": [
+          {
+            "id": "call-maya-back",
+            "text": "Call Maya back",
+            "appointmentTime": null,
+            "sourceExcerpt": "Call Maya back."
+          },
+          {
+            "id": "enter-todays-payments",
+            "text": "Enter today’s payments",
+            "appointmentTime": null,
+            "sourceExcerpt": "Enter today’s payments."
+          }
+        ],
+        "priorityTaskIds": [
+          "call-maya-back",
+          "enter-todays-payments"
+        ],
+        "attention": []
+      }
+    },
+    {
+      "name": "context-only",
+      "passed": true,
+      "latencyMs": 2005,
+      "usage": {
+        "completion_tokens": 58,
+        "prompt_tokens": 397,
+        "total_tokens": 455,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": {
+          "audio_tokens": null,
+          "cached_tokens": 368
+        }
+      },
+      "result": {
+        "kind": "no_actions",
+        "goal": "",
+        "tasks": [],
+        "priorityTaskIds": [],
+        "attention": [
+          {
+            "kind": "context",
+            "text": "The business logo is green."
+          },
+          {
+            "kind": "context",
+            "text": "Jordan is a customer."
+          },
+          {
+            "kind": "context",
+            "text": "The office walls are cream."
+          }
+        ]
+      }
+    }
+  ]
+}
