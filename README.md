@@ -22,9 +22,9 @@ Open **http://127.0.0.1:3000**. Generation sends notes to Nebius and needs inter
 
 ## Current build checkpoint
 
-Slice 1 provides real plan generation, validated output, responsive results, no-action handling, and manual failure recovery. Task completion, regeneration confirmation, and browser persistence belong to the next approved slices and are not implemented yet. Refreshing currently clears the on-screen work.
+Slice 1 provides real plan generation, validated output, responsive results, no-action handling, and manual failure recovery. Slice 2 now adds task completion and confirmed regeneration and has passed hands-on review for its recovery checkpoint. Check tasks in Your Plan; generating with checked tasks asks for confirmation. Cancel preserves work; valid plan or no-action results reset progress; errors preserve it. Browser persistence remains Slice 3, so refreshing currently clears the on-screen work.
 
-The requested Nemotron Lightning switch uses `chat_template_kwargs: { enable_thinking: false }`. Slice 1 is accepted for its recovery checkpoint: the raw model grounding benchmark is 29/30 for the retained prompt, automated regression is 21/21, and browser regression passed. The model converted "this week" into unsupported "weekly" recurrence; server-side validation correctly rejected it before browser delivery. This is an accepted residual model limitation, documented in `devpost/nebius-check/grounding-investigation.md`. Slice 2 has not started. The 15-second timeout is unchanged.
+The requested Nemotron Lightning switch uses `chat_template_kwargs: { enable_thinking: false }`. Slice 1 is accepted for its recovery checkpoint: the raw model grounding benchmark is 29/30 for the retained prompt, automated regression is 21/21, and browser regression passed. The model converted "this week" into unsupported "weekly" recurrence; server-side validation correctly rejected it before browser delivery. This is an accepted residual model limitation, documented in `devpost/nebius-check/grounding-investigation.md`. Slice 1 is committed at `15b94e1`; Slice 2 is complete and approved for its recovery checkpoint; Slice 3 has not started. The 15-second timeout is unchanged.
 
 ## Verify
 
@@ -59,3 +59,7 @@ Exact live grounding regression: `node --env-file=.env scripts/check-temporal-re
 - `public/app.js` and `public/render.js`: screen behavior and safe text rendering.
 
 The local `.env` and learner profile are ignored by Git. Only files inside `public/` are served to browsers. Express and Ajv are the only application dependencies.
+
+Slice 2 verification: `npm.cmd test` passed 28/28. Run `node --env-file=.env scripts/verify-browser.mjs --lifecycle-only` for deterministic completion/regeneration browser tests without model calls. The combined live run also checks model behavior; its latest run exposed supplies placed ahead of appointments. The unchanged grounding validator accepted that result: this is a model ordering-quality limitation, separate from the rejected recurrence case. See the checklist for review status.
+
+The omission follow-up adds conservative server-side coverage for explicit source actions and appointments. Its 5 focused tests and the 21 existing validator/temporal/API tests passed; browser lifecycle checks passed again. Hands-on review confirmed all seven tasks, completion, failed-regeneration preservation, and cancellation preservation.

@@ -38,7 +38,7 @@ button:disabled {
   cursor:wait
 }
 
-button:focus-visible,textarea:focus-visible,a:focus-visible {
+button:focus-visible,textarea:focus-visible,a:focus-visible,input:focus-visible {
   outline:3px solid #8aac9c;
   outline-offset:4px
 }
@@ -491,6 +491,47 @@ textarea:disabled {
   margin:0 7px 3px 0
 }
 
+.plan-list .task-label {
+  display:flex;
+  align-items:baseline;
+  gap:12px;
+  margin:0;
+  font-size:inherit;
+  font-weight:400;
+  cursor:pointer;
+  flex:1;
+  min-width:0
+}
+
+.task-label input {
+  accent-color:var(--teal);
+  width:17px;
+  height:17px;
+  flex:none;
+  margin:0;
+  align-self:flex-start;
+  margin-top:2px
+}
+
+.plan-list .completed .task-content {
+  color:var(--muted);
+  text-decoration:line-through
+}
+
+dialog {
+  color:var(--ink);
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:26px;
+  width:min(440px, calc(100% - 40px));
+  box-shadow:0 12px 45px #303c3720
+}
+
+dialog::backdrop { background:#303c3755 }
+.dialog-actions { display:flex; gap:24px; align-items:center; margin-top:24px }
+.dialog-actions .primary-button { width:auto; margin-left:auto }
+
 .attention-card {
   background:var(--attention)
 }
@@ -616,5 +657,4 @@ h1 {
 
 
 }
-
 

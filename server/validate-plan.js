@@ -1,6 +1,7 @@
 import Ajv from 'ajv';
 import { planSchema } from './plan-schema.js';
 import { hasGroundedTemporalLanguage } from './temporal-grounding.js';
+import { hasExplicitSourceCoverage } from './source-coverage.js';
 
 const validateShape = new Ajv({ allErrors: false }).compile(planSchema);
 const nonblank = (value) => typeof value === 'string' && value.trim().length > 0;
@@ -15,6 +16,7 @@ export function validatePlan(result, notes) {
   require(validateShape(result));
   require(result.attention.every(item => nonblank(item.text)));
   require(hasGroundedTemporalLanguage(result, notes));
+  require(hasExplicitSourceCoverage(result, notes));
 
   if (result.kind === 'no_actions') {
     require(result.goal === '' && result.tasks.length === 0 && result.priorityTaskIds.length === 0);

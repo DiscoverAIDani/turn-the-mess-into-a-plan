@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import assert from 'node:assert/strict';
 import { createApp } from '../server/index.js';
 import { generatePlan } from '../server/nebius.js';
+import { verifyLifecycle } from './verify-lifecycle.mjs';
 
 const appServer = createApp({ generate: async notes => {
   try {
@@ -109,6 +110,7 @@ try {
   await screenshot('initial-desktop');
   await submit('   ');
   assert.ok((await evaluate(`document.querySelector('#error-message').textContent`)).includes('Add a few notes'));
+  if (!process.argv.includes('--lifecycle-only')) {
   const business = "Call Maya back about missed estimate — urgent. 9:00 AM carpet cleaning. 11:30 AM upholstery job. Follow up with Jordan. Post one Facebook update. Enter today's payments. Need to order supplies sometime this week.";
   const started = Date.now();
   await submit(business);
@@ -151,8 +153,11 @@ try {
   assert.equal(await evaluate(`Boolean(document.querySelector('.no-actions'))`), true, 'No-action result is rendered');
   assert.equal(await evaluate(`Boolean(document.querySelector('.plan-list'))`), false, 'Old plan is removed');
   assert.ok((await evaluate(`document.querySelector('#notes').value`)).includes('logo is green'));
+  }
+  await cdp.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await verifyLifecycle({ cdp, evaluate, waitFor, screenshot });
   assert.deepEqual(errors, []);
-  console.log('Browser checks passed: keyboard focus, blank input, real 3/1/2 priorities, appointments, failure preservation, no-action replacement, narrow layout, and no JavaScript exceptions.');
+  console.log(`Browser checks passed (${process.argv.includes('--lifecycle-only') ? 'deterministic lifecycle only' : 'live generation plus lifecycle'}), with no JavaScript exceptions.`);
 } finally {
   pageSocket?.socket.close();
   if (browserSocket) { await browserSocket.send('Browser.close').catch(() => {}); browserSocket.socket.close(); }

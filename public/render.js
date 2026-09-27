@@ -19,7 +19,7 @@ function taskContent(task) {
   return content;
 }
 
-export function renderResult(container, result, onEdit) {
+export function renderResult(container, result, onEdit, { completedTaskIds = new Set(), onToggle = () => {} } = {}) {
   const fragment = document.createDocumentFragment();
   if (result.kind === 'no_actions') {
     const empty = node('section', 'result-card no-actions');
@@ -50,7 +50,18 @@ export function renderResult(container, result, onEdit) {
     const tasks = node('ol', 'plan-list');
     for (const task of result.tasks) {
       const item = node('li');
-      item.append(taskContent(task));
+      const label = node('label', 'task-label');
+      const checkbox = node('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = completedTaskIds.has(task.id);
+      item.classList.toggle('completed', checkbox.checked);
+      checkbox.addEventListener('change', () => {
+        onToggle(task.id, checkbox.checked);
+        checkbox.checked = completedTaskIds.has(task.id);
+        item.classList.toggle('completed', checkbox.checked);
+      });
+      label.append(checkbox, taskContent(task));
+      item.append(label);
       tasks.append(item);
     }
     plan.append(tasks);

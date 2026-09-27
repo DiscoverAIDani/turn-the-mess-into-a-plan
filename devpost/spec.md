@@ -79,7 +79,7 @@ The prompt treats pasted notes as data rather than instructions, preserves state
 
 ### Browser Controller and Rendering
 Implements `prd.md > Notes and Plan Generation`, `Checklist Completion and Regeneration`, `Generation Failure and Recovery`, and `Approved Defaults`.
-`public/app.js` owns the current work and temporary UI state. `public/render.js` renders result text using safe text nodes, never model-supplied HTML. Derive the priority heading from the count. A valid no-action result renders only the no-action message, Edit Notes, and any supported attention context; old plan cards and checked tasks disappear.
+`public/app.js` coordinates current work and temporary UI state. Slice 2 extracts in-memory result, completed task IDs, and request identity into `public/plan-state.js` so replacement/failure/late-response behavior can be tested independently. A browser renderability guard rejects malformed API payloads before replacing current work; it does not replace server-side schema or grounding validation. `public/render.js` renders result text using safe text nodes, never model-supplied HTML. Derive the priority heading from the count. A valid no-action result renders only the no-action message, Edit Notes, and any supported attention context; old plan cards and checked tasks disappear.
 
 Generation snapshots the submitted notes. As a derived race-prevention detail, lock edits and task toggles during the request; clear can cancel/invalidate the request after confirmation. Use a request identity so late responses cannot restore cleared work. Focus Edit Notes back into the input. Temporary messages and dialogs are not saved.
 
@@ -115,6 +115,7 @@ project/
     index.html              # Single screen and confirmation UI
     styles.css              # Responsive warm visual design
     app.js                  # User actions and request lifecycle
+    plan-state.js           # In-memory completion and safe result replacement
     render.js               # Safe result rendering
     storage.js              # Browser-local save/restore/clear
   server/
