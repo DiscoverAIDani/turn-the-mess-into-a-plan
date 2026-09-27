@@ -48,4 +48,12 @@ export class PlanState {
     this.loading = false;
     return true;
   }
+
+  clear() {
+    // Invalidate first, so even a response that ignores abort cannot restore cleared work.
+    this.requestId++;
+    this.loading = false;
+    this.result = null;
+    this.completedTaskIds.clear();
+  }
 }

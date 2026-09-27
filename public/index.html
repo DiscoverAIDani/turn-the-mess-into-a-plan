@@ -30,6 +30,8 @@
             <div class="message-actions"><button id="try-again" type="button" class="text-button">Try Again</button><button id="edit-notes" type="button" class="text-button">Edit Notes</button></div>
           </div>
         </form>
+        <button id="start-over" type="button" class="text-button">Clear / Start Over</button>
+        <p id="storage-notice" class="inline-message" role="status" hidden></p>
         <p class="input-footnote">Your notes are sent to Nebius to create your plan.</p>
       </section>
       <section class="results-panel" id="results" aria-labelledby="results-heading" tabindex="-1">
@@ -52,6 +54,13 @@
     <div class="dialog-actions">
       <button id="cancel-regenerate" type="button" class="text-button" autofocus>Cancel</button>
       <button id="confirm-regenerate" type="button" class="primary-button">Make New Plan</button>
+    </div>
+  </dialog>
+  <dialog id="clear-dialog" aria-labelledby="clear-title">
+    <h2 id="clear-title">Clear your notes, plan, and completed tasks from this browser?</h2>
+    <div class="dialog-actions">
+      <button id="cancel-clear" type="button" class="text-button" autofocus>Cancel</button>
+      <button id="confirm-clear" type="button" class="primary-button">Start Over</button>
     </div>
   </dialog>
 </body>
