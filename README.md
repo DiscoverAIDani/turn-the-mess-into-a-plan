@@ -1,79 +1,65 @@
 # Turn the mess into a plan
 
-A small local web app that turns scattered notes into a goal, up to three priorities, an ordered plan, and grounded matters needing attention.
+A small AI-assisted planning app that turns scattered notes into a clear goal, up to three priorities, an actionable checklist, and grounded context or uncertainty.
 
-## Run locally
+Built with **NVIDIA Nemotron 3.5 Lightning** through **Nebius Token Factory**.
 
-Node 24 is already installed in the project environment. Install the two application dependencies:
+## Why I built it
 
-```sh
-npm install
+People rarely write perfect task lists.
+
+Real notes look more like:
+
+> Need to call the dentist, pick up dog food, Mom’s birthday is Friday and I still need a gift, laundry is piling up, and I should email Sarah about lunch next week.
+
+The goal of this project is to turn that kind of messy input into something useful **without quietly inventing, dropping, or changing what the user actually said**.
+
+## What it does
+
+The app turns unstructured notes into four simple areas:
+
+- **Your Goal** — a concise summary of what needs to get done
+- **Top 3 Priorities** — the most important actions to focus on first
+- **Your Plan** — a checkable task list
+- **Needs Attention** — context, uncertainty, or timing information that should not become a task
+
+Completed tasks can be checked off, and notes, the latest valid plan, and completion state persist across browser refreshes.
+
+Users can safely regenerate a plan or use **Clear / Start Over** to reset saved work.
+
+## How it works
+
+```text
+Messy notes
+    ↓
+Nebius Token Factory
+    ↓
+NVIDIA Nemotron 3.5 Lightning
+    ↓
+Structured JSON
+    ↓
+Server-side grounding and consistency validation
+    ↓
+Plan shown to the user
 ```
 
-If `.env` does not already exist, copy `.env.example` to `.env`. Enter your Nebius API key in that local file. Keep the verified `NEBIUS_MODEL=nvidia/Nemotron-3_5-Lightning` setting. Never put keys in browser files or commit `.env`.
+The model response is **not automatically trusted**.
 
-```sh
-npm start
-```
+Before a plan reaches the browser, the server checks:
 
-On this Windows machine, use **`npm.cmd install`**, **`npm.cmd start`**, and **`npm.cmd test`** in PowerShell because its execution policy blocks the `npm.ps1` launcher. No policy change is needed. Keep the terminal running while using the app; press Ctrl+C to stop it.
+- structured response shape
+- source-action coverage
+- exact source excerpts
+- supplied appointment timing
+- unsupported deadlines, recurrence, duration, and urgency
+- malformed or incomplete results
+- context that should not be converted into an action
 
-Open **http://127.0.0.1:3000**. Generation sends notes to Nebius and needs internet and usable API credit. The server listens only on this computer. No hosting or deployment is required for the demo.
+If validation fails, the generated result is rejected rather than silently shown to the user.
 
-## Current build checkpoint
+## Example
 
-All three approved implementation slices are committed and have passed their slice-specific hands-on reviews. Slice 1 provides real plan generation, validated output, responsive results, no-action handling, and manual failure recovery. Slice 2 adds task completion and confirmed regeneration. Cancel preserves work; valid plan or no-action results reset progress; errors preserve it. Slice 3 saves notes, the latest valid result, and checked tasks in this browser across refresh or return to the same URL. Clear / Start Over asks for confirmation before clearing current and saved work. Final whole-app review passed and is approved; the learning wrap-up remains pending.
-
-The requested Nemotron Lightning switch uses `chat_template_kwargs: { enable_thinking: false }`. Slice 1 is accepted for its recovery checkpoint: the raw model grounding benchmark is 29/30 for the retained prompt, automated regression is 21/21, and browser regression passed. The model converted "this week" into unsupported "weekly" recurrence; server-side validation correctly rejected it before browser delivery. This is an accepted residual model limitation, documented in `devpost/nebius-check/grounding-investigation.md`. Slice 1 is committed at `15b94e1`; Slice 2 at `cbdb06d`; Slice 3 at `325fa84`. The 15-second timeout is unchanged.
-
-## Verify
-
-```sh
-npm test
-```
-
-These tests use synthetic data and simulated requests without an API key or paid calls. Real-model compatibility evidence is in `devpost/nebius-check/`. The selected model was tested for the business example, one and two priorities, and context-only input; this small sample does not guarantee semantic accuracy.
-
-Optional developer browser verification: `node --env-file=.env scripts/verify-browser.mjs` starts an isolated app server on a temporary port and installed Chrome headlessly, runs four small live requests plus simulated failure checks, and saves ignored synthetic test output and screenshots in `.tmp/`. It can run beside your normal app server and consumes a small amount of API credit. Set `BROWSER_EXE` if Chrome is installed elsewhere. This script adds no application dependency.
-
-Explicit latency and semantic benchmark: `node --env-file=.env scripts/benchmark-nebius.mjs` runs ten synthetic requests using production settings and saves a credential-free report in `.tmp/nebius-benchmark.json`. It consumes API credit and exits unsuccessfully if any case fails. Its 6,000-character case pads a short task to verify the input boundary; it does not establish reliability for dense long notes.
-
-Exact live grounding regression: `node --env-file=.env scripts/check-temporal-regression.mjs` submits `Call Maya back.` through the real API route and requires a successful one-task result without added timing. This is one paid/credit-backed request, run only explicitly. Automated `npm.cmd test` also checks that a fabricated "today" response is rejected rather than sent to the browser.
-
-## Limits and behavior
-
-- 6,000 input characters; blank or over-limit notes do not call the model.
-- 15-second upstream timeout; 4,096-token output cap; no automatic retries.
-- The server rejects malformed, refused, incomplete, or inconsistent model output. Errors leave the current result intact.
-- A valid no-action response replaces the old plan. It is not an error.
-- Structured JSON and source-excerpt checks reduce errors but do not prove every statement is grounded.
-- A conservative temporal guard checks common timing, deadline, duration, recurrence, and urgency language against source evidence, including the goal and attention items. It may reject paraphrases; it is not a general proof of factual correctness.
-
-## Where the plan meets the code
-
-- `devpost/prd.md`: what the app must do.
-- `devpost/spec.md`: approved components and data flow.
-- `devpost/checklist.md`: verified progress and learner checkpoints.
-- `server/plan-schema.js` and `server/validate-plan.js`: grounded response contract and checks.
-- `server/nebius.js`: protected provider request.
-- `public/app.js` and `public/render.js`: screen behavior and safe text rendering.
-- `public/storage.js`: one versioned browser-local saved entry and restore validation.
-
-The local `.env` and learner profile are ignored by Git. Only files inside `public/` are served to browsers. Express and Ajv are the only application dependencies.
-
-Slice 2 verification: `npm.cmd test` passed 28/28. Run `node --env-file=.env scripts/verify-browser.mjs --lifecycle-only` for deterministic completion/regeneration browser tests without model calls. The combined live run also checks model behavior; its latest run exposed supplies placed ahead of appointments. The unchanged grounding validator accepted that result: this is a model ordering-quality limitation, separate from the rejected recurrence case. See the checklist for review status.
-
-The omission follow-up adds conservative server-side coverage for explicit source actions and appointments. Its 5 focused tests and the 21 existing validator/temporal/API tests passed; browser lifecycle checks passed again. Hands-on review confirmed all seven tasks, completion, failed-regeneration preservation, and cancellation preservation.
-
-Slice 3 verification: the full automated suite passed 40/40. `node --env-file=.env scripts/verify-browser.mjs --lifecycle-only` runs deterministic completion/regeneration and persistence checks without model calls; `--persistence-only` selects just persistence/reset cases. Both passed. Current browser saving is local to the same browser profile and exact origin (`http://127.0.0.1:3000`); switching hostnames or ports uses a different saved entry. If saving is unavailable, the screen stays usable and explains that current changes may not survive refresh.
-
-Hands-on Slice 3 check: make a plan, check a task, edit the notes, and refresh or leave and return to the same URL. Confirm the notes, plan, and checks return. Cancel Start Over once, then confirm it and refresh; the screen should remain empty. A valid no-action replacement should also survive refresh without restoring an old plan.
-
-## Final review and demo walkthrough
-
-The 2026-09-29 review reran the existing automated suite (40/40 passed) and deterministic browser lifecycle/persistence checks (passed, no JavaScript exceptions). No live benchmark was rerun; the documented model limitations remain. Final whole-app learner feedback is resolved and approved; the learning wrap-up remains pending. Open [the offline app map](devpost/app-map.html) for the code route and reusable verification practice.
-
-For the short demo, start the app at the documented URL and paste this synthetic business example:
+Input:
 
 ```text
 Call Maya back about missed estimate — urgent.
@@ -85,8 +71,172 @@ Enter today’s payments.
 Need to order supplies sometime this week.
 ```
 
-Show the notes becoming the four result sections, inspect all seven supported tasks and supplied timing, then check a task. The target is to demonstrate the transition in under a minute, not a guaranteed provider response time. For final review, also edit notes and refresh, cancel regeneration, confirm a context-only replacement, and cancel then confirm Start Over. Try blank input and a narrow window. Report any unexpected behavior before calling the build ready. Use synthetic notes for the recording.
+The app preserves all seven supported actions, keeps the supplied appointment times intact, and separates uncertainty from the task list.
 
-Final-review correction (hands-on approved): coordinated messy notes now use separate recognized action clauses for coverage instead of requiring a whole-paragraph excerpt. Prompt examples distinguish descriptive context from stated actions and make the fixed-appointment caveat conditional. Exact-excerpt and temporal checks remain intact. Final checks passed 44/44 automated tests plus deterministic browser lifecycle/persistence checks. Small live checks passed the exact reported paragraph three times, the seven-task business example twice, and callback/context-only cases; this is sample evidence, not a reliability guarantee. Restart the Node server before retrying to load the changed server code.
+A more natural messy-note example:
 
-Final hands-on review passed for both the exact messy-note paragraph and the original seven-task business example, including supplied timing, descriptive context, and appointment preservation. The learner approved the final recovery commit.
+```text
+Need to call the dentist, pick up dog food, Mom’s birthday is Friday and I still need a gift, laundry is piling up, and I should email Sarah about lunch next week.
+```
+
+The app produces actions for:
+
+- calling the dentist
+- picking up dog food
+- getting Mom a gift
+- emailing Sarah
+
+while keeping **“laundry is piling up”** as context instead of inventing a laundry task.
+
+## Grounding and safety
+
+During testing, Nemotron once omitted one of seven explicit source tasks.
+
+Instead of fixing only that example, the app gained a deterministic **source-action coverage guard** so incomplete plans can be rejected before reaching the user.
+
+Final QA also uncovered a validator issue with natural notes containing several actions separated by commas and conjunctions. The coverage logic was updated so each recognized action can use its own source evidence without weakening omission protection.
+
+The app still deliberately rejects:
+
+- unsupported timing
+- fabricated recurrence
+- changed source excerpts
+- missing explicit actions
+- descriptive context converted into an unstated task
+
+These safeguards reduce model mistakes, but they do not prove that every model interpretation is semantically perfect.
+
+## Built with
+
+- **NVIDIA Nemotron 3.5 Lightning**
+- **Nebius Token Factory**
+- Node.js
+- Express
+- Ajv
+- Vanilla HTML, CSS, and JavaScript
+
+The selected model is:
+
+```text
+nvidia/Nemotron-3_5-Lightning
+```
+
+Structured generation uses:
+
+```js
+chat_template_kwargs: { enable_thinking: false }
+```
+
+## Run locally
+
+### 1. Install dependencies
+
+```sh
+npm install
+```
+
+On Windows, if PowerShell blocks the `npm.ps1` launcher, use:
+
+```sh
+npm.cmd install
+```
+
+### 2. Configure Nebius
+
+Copy `.env.example` to a local `.env` file.
+
+Add your Nebius API key and keep:
+
+```text
+NEBIUS_MODEL=nvidia/Nemotron-3_5-Lightning
+```
+
+Never commit `.env`.
+
+### 3. Start the app
+
+```sh
+npm start
+```
+
+On Windows:
+
+```sh
+npm.cmd start
+```
+
+Then open:
+
+```text
+http://127.0.0.1:3000
+```
+
+Generation requires internet access and usable Nebius API credit.
+
+## Verification
+
+Run the automated test suite with:
+
+```sh
+npm test
+```
+
+or on Windows:
+
+```sh
+npm.cmd test
+```
+
+Current final verification:
+
+- **44/44 automated tests passed**
+- deterministic browser lifecycle checks passed
+- persistence/reset browser checks passed
+- desktop and narrow/mobile hands-on review passed
+- live checks passed for the seven-task business example
+- live checks passed for the natural messy-note example
+- callback and context-only cases passed
+
+The live checks are small samples and are not a guarantee of model reliability.
+
+## Key behavior
+
+- 6,000-character input limit
+- blank or oversized input does not call the model
+- 15-second upstream timeout
+- no automatic retries
+- failed generations preserve the current valid plan
+- valid no-action results can replace an old plan
+- completed tasks persist in the same browser
+- saved state is local to the same browser profile and origin
+- Clear / Start Over requires confirmation
+
+## Known limitations
+
+LLM output remains probabilistic.
+
+The model can still make ordering-quality decisions that are not ideal even when the result is grounded.
+
+The validators are intentionally conservative and may reject some valid paraphrases.
+
+Browser persistence is local only. Switching browser profiles, hostnames, or ports creates a separate saved state.
+
+The app currently runs locally and requires a Nebius API key.
+
+## Project documentation
+
+More detailed development and verification material is available here:
+
+- [`devpost/prd.md`](devpost/prd.md) — product requirements
+- [`devpost/spec.md`](devpost/spec.md) — architecture and data flow
+- [`devpost/checklist.md`](devpost/checklist.md) — implementation and verification record
+- [`devpost/app-map.html`](devpost/app-map.html) — visual application/code map
+- [`devpost/nebius-check/`](devpost/nebius-check/) — Nemotron compatibility and grounding investigation
+
+## Privacy
+
+The Nebius API key stays in the local `.env` file and is never sent to the browser.
+
+`.env` is excluded from Git.
+
+Only files in `public/` are served to the browser.
