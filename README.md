@@ -22,9 +22,9 @@ Open **http://127.0.0.1:3000**. Generation sends notes to Nebius and needs inter
 
 ## Current build checkpoint
 
-Slice 1 provides real plan generation, validated output, responsive results, no-action handling, and manual failure recovery. Slice 2 now adds task completion and confirmed regeneration and has passed hands-on review for its recovery checkpoint. Check tasks in Your Plan; generating with checked tasks asks for confirmation. Cancel preserves work; valid plan or no-action results reset progress; errors preserve it. Slice 3 now saves notes, the latest valid result, and checked tasks in this browser across refresh or return to the same URL. Clear / Start Over asks for confirmation before clearing current and saved work. Its hands-on review is pending.
+All three approved implementation slices are committed and have passed their slice-specific hands-on reviews. Slice 1 provides real plan generation, validated output, responsive results, no-action handling, and manual failure recovery. Slice 2 adds task completion and confirmed regeneration. Cancel preserves work; valid plan or no-action results reset progress; errors preserve it. Slice 3 saves notes, the latest valid result, and checked tasks in this browser across refresh or return to the same URL. Clear / Start Over asks for confirmation before clearing current and saved work. Final whole-app review passed and is approved; the learning wrap-up remains pending.
 
-The requested Nemotron Lightning switch uses `chat_template_kwargs: { enable_thinking: false }`. Slice 1 is accepted for its recovery checkpoint: the raw model grounding benchmark is 29/30 for the retained prompt, automated regression is 21/21, and browser regression passed. The model converted "this week" into unsupported "weekly" recurrence; server-side validation correctly rejected it before browser delivery. This is an accepted residual model limitation, documented in `devpost/nebius-check/grounding-investigation.md`. Slice 1 is committed at `15b94e1`; Slice 2 is committed at `cbdb06d`; Slice 3 is implemented but uncommitted pending hands-on review. The 15-second timeout is unchanged.
+The requested Nemotron Lightning switch uses `chat_template_kwargs: { enable_thinking: false }`. Slice 1 is accepted for its recovery checkpoint: the raw model grounding benchmark is 29/30 for the retained prompt, automated regression is 21/21, and browser regression passed. The model converted "this week" into unsupported "weekly" recurrence; server-side validation correctly rejected it before browser delivery. This is an accepted residual model limitation, documented in `devpost/nebius-check/grounding-investigation.md`. Slice 1 is committed at `15b94e1`; Slice 2 at `cbdb06d`; Slice 3 at `325fa84`. The 15-second timeout is unchanged.
 
 ## Verify
 
@@ -68,3 +68,25 @@ The omission follow-up adds conservative server-side coverage for explicit sourc
 Slice 3 verification: the full automated suite passed 40/40. `node --env-file=.env scripts/verify-browser.mjs --lifecycle-only` runs deterministic completion/regeneration and persistence checks without model calls; `--persistence-only` selects just persistence/reset cases. Both passed. Current browser saving is local to the same browser profile and exact origin (`http://127.0.0.1:3000`); switching hostnames or ports uses a different saved entry. If saving is unavailable, the screen stays usable and explains that current changes may not survive refresh.
 
 Hands-on Slice 3 check: make a plan, check a task, edit the notes, and refresh or leave and return to the same URL. Confirm the notes, plan, and checks return. Cancel Start Over once, then confirm it and refresh; the screen should remain empty. A valid no-action replacement should also survive refresh without restoring an old plan.
+
+## Final review and demo walkthrough
+
+The 2026-09-29 review reran the existing automated suite (40/40 passed) and deterministic browser lifecycle/persistence checks (passed, no JavaScript exceptions). No live benchmark was rerun; the documented model limitations remain. Final whole-app learner feedback is resolved and approved; the learning wrap-up remains pending. Open [the offline app map](devpost/app-map.html) for the code route and reusable verification practice.
+
+For the short demo, start the app at the documented URL and paste this synthetic business example:
+
+```text
+Call Maya back about missed estimate — urgent.
+9:00 AM carpet cleaning.
+11:30 AM upholstery job.
+Follow up with Jordan.
+Post one Facebook update.
+Enter today’s payments.
+Need to order supplies sometime this week.
+```
+
+Show the notes becoming the four result sections, inspect all seven supported tasks and supplied timing, then check a task. The target is to demonstrate the transition in under a minute, not a guaranteed provider response time. For final review, also edit notes and refresh, cancel regeneration, confirm a context-only replacement, and cancel then confirm Start Over. Try blank input and a narrow window. Report any unexpected behavior before calling the build ready. Use synthetic notes for the recording.
+
+Final-review correction (hands-on approved): coordinated messy notes now use separate recognized action clauses for coverage instead of requiring a whole-paragraph excerpt. Prompt examples distinguish descriptive context from stated actions and make the fixed-appointment caveat conditional. Exact-excerpt and temporal checks remain intact. Final checks passed 44/44 automated tests plus deterministic browser lifecycle/persistence checks. Small live checks passed the exact reported paragraph three times, the seven-task business example twice, and callback/context-only cases; this is sample evidence, not a reliability guarantee. Restart the Node server before retrying to load the changed server code.
+
+Final hands-on review passed for both the exact messy-note paragraph and the original seven-task business example, including supplied timing, descriptive context, and appointment preservation. The learner approved the final recovery commit.

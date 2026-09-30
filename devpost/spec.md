@@ -5,7 +5,7 @@ status: approved
 
 # Messy Notes to a Clear Next Step — Technical Spec
 
-Approved technical blueprint. Account-specific schema tests support `openai/gpt-oss-120b` for the prototype. The learner approved the architecture and limits, changing the upstream timeout to 15 seconds. Model quality remains bounded by the small test sample.
+Approved technical blueprint, implemented through Slice 3 (`325fa84`). The current model is `nvidia/Nemotron-3_5-Lightning`; the earlier GPT-OSS investigation below is historical evidence, not the active configuration. The learner approved the architecture and limits, changing the upstream timeout to 15 seconds. Model quality remains bounded by the small test sample.
 
 ## Slice 1 Recovery Checkpoint Update
 
@@ -16,7 +16,7 @@ This approved implementation update supersedes the historical model selection be
 - Automated regression: **21/21 passed**.
 - Browser regression: **passed**.
 
-Known residual model-risk example: source `Need to order supplies sometime this week.` produced the goal `Return calls, handle appointments, and complete weekly tasks`. A one-time window does not establish weekly recurrence. The server rejected this response; the case demonstrates why validation exists even with explicit grounding instructions. The learner accepts this documented model limitation for Slice 1. See `nebius-check/grounding-investigation.md` for exact original notes and experimental history. No prompt or validation weakening is authorized. Stop after the Slice 1 recovery commit, before Slice 2.
+Known residual model-risk example: source `Need to order supplies sometime this week.` produced the goal `Return calls, handle appointments, and complete weekly tasks`. A one-time window does not establish weekly recurrence. The server rejected this response; the case demonstrates why validation exists even with explicit grounding instructions. The learner accepts this documented model limitation for Slice 1. See `nebius-check/grounding-investigation.md` for exact original notes and experimental history. No prompt or validation weakening is authorized. Slice 1 was committed at `15b94e1`; Slices 2 and 3 followed at `cbdb06d` and `325fa84`. Final whole-app review is approved; the learning wrap-up remains pending.
 
 ## How This Works, In Plain Language
 The browser shows the notes and plan and remembers current work on this computer. A small Node.js program runs locally and serves the screen. When the user requests a plan, this program sends the notes to Nebius using a secret key that never goes to the browser. It checks the returned data before sending an accepted result to the screen.
@@ -40,14 +40,14 @@ Implements `prd.md > The Core Journey`.
 - Plain HTML, CSS, and JavaScript modules: agreed frontend; no framework, bundler, or separate frontend development server.
 - Ajv **8.20.0** (locked during build): approved validation dependency for checking the same JSON schema sent to the model, avoiding a separate handwritten schema validator in the product. [Ajv](https://ajv.js.org/guide/getting-started.html).
 - Browser localStorage: agreed persistence for one current result, with no database. [Browser storage documentation](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
-- Nebius Token Factory: agreed provider; select `openai/gpt-oss-120b` following the account-specific investigation below. Read its exact ID from `NEBIUS_MODEL`, with no silent fallback. No AI SDK required. [Nebius quickstart](https://docs.tokenfactory.nebius.com/quickstart).
+- Nebius Token Factory: agreed provider; use the approved `nvidia/Nemotron-3_5-Lightning` selection with thinking disabled. Read its exact ID from `NEBIUS_MODEL`, with no silent fallback. No AI SDK required. [Nebius quickstart](https://docs.tokenfactory.nebius.com/quickstart).
 
 ## Where It Runs and How Someone Tries It
-Run on this Windows computer using its installed Node. Build will supply `npm install`, then `npm start` (defined as `node --env-file=.env server/index.js`). Open **http://127.0.0.1:3000** consistently so browser storage uses the same origin. Bind the server to loopback for the local prototype.
+Run on this Windows computer using its installed Node. Run `npm install`, then `npm start` (defined as `node --env-file=.env server/index.js`). Open **http://127.0.0.1:3000** consistently so browser storage uses the same origin. Bind the server to loopback for the local prototype.
 
 Build environment note: PowerShell blocks `npm.ps1` here; use `npm.cmd install`, `npm.cmd start`, and `npm.cmd test`. The app and dependencies are unchanged and no execution-policy change is needed.
 
-The local `.env` contains `NEBIUS_API_KEY`, `NEBIUS_MODEL=openai/gpt-oss-120b`, and `PORT=3000`. `.env.example` has a blank credential value and the verified model ID. Existing ignore rules exclude `.env` and `.env.*` while allowing `.env.example`. Never log keys or place credentials in public assets, API responses, tests, or committed files.
+The local `.env` contains `NEBIUS_API_KEY`, `NEBIUS_MODEL=nvidia/Nemotron-3_5-Lightning`, and `PORT=3000`. `.env.example` has a blank credential value and the verified model ID. Existing ignore rules exclude `.env` and `.env.*` while allowing `.env.example`. Never log keys or place credentials in public assets, API responses, tests, or committed files.
 
 The demo runs locally but requires internet and usable Nebius credits for new generation. Saved results and checkbox interaction remain browser-local. Submissions require a short demo video and a public GitHub repository. Deployment is optional and no hosting platform is selected.
 
@@ -71,11 +71,15 @@ Implements `prd.md > Grounded Prioritization`, `Supported Priority Counts and No
 
 When the generated order puts untimed work before an appointment, require an uncertainty item as a conservative consistency guard. The prompt explains that the suggested order does not establish whether it fits before the appointment. A context label alone is insufficient.
 
-`server/temporal-grounding.js` additionally checks common relative dates, clock times, dayparts, deadlines/order relations, durations, recurrence, and urgency in generated goals, task text, and attention. Task claims are compared to that task's exact source excerpt; goal and attention claims are compared to the notes. Reject unsupported claims through the same generation-failure path. Do not repair or show the raw rejected result. Remove implicit "daily" framing from the generation instructions; goals summarize actions while supplied timing remains on relevant tasks. The original UI design and headings are unchanged.
+`server/temporal-grounding.js` additionally checks common relative dates, clock times, dayparts, deadlines/order relations, durations, recurrence, and urgency in generated goals, task text, and attention. Task claims are compared to that task's exact source excerpt; goal and attention claims are compared to the notes. Reject unsupported claims through the same generation-failure path. Do not repair or show the raw rejected result. Remove implicit "daily" framing from the generation instructions; goals summarize actions while supplied timing remains on relevant tasks. The approved UI design is retained, including the Slice 1 **Your Goal** heading.
 
 One exact uncertainty sentence is allowed for mixed timed/untimed tasks: `Suggested order only: whether untimed work fits before fixed appointments is unknown.` It describes uncertain fit and does not assert a deadline. There is no general exemption for assumptions or uncertainties. This deterministic guard is conservative: it can reject temporal paraphrases and does not prove arbitrary natural-language semantics. The regression specifically rejects "Return Maya's call today" for `Call Maya back.` and prevents borrowing "today" from a separate payment task.
 
-The prompt treats pasted notes as data rather than instructions, preserves stated facts and times, and never supplies the computer's current time to fill missing information. Apply grounding to the goal and attention text, preserve broad timing such as "this week" visibly in task text, and explicitly require a timing uncertainty when suggesting untimed work around appointments. Use the tested instructions plus grounding clarification in `nebius-check/check.mjs` as the starting point. Require exact source excerpts for task support. Validate excerpts occur in the submitted notes and appointment strings occur in their task evidence. This is a useful guard, not a proof that all language is factually grounded; semantic examples are tested separately.
+The prompt treats pasted notes as data rather than instructions, preserves stated facts and times, and never supplies the computer's current time to fill missing information. Apply grounding to the goal and attention text, preserve broad timing such as "this week" visibly in task text, and explicitly require a timing uncertainty when suggesting untimed work around appointments. The retained production instructions live in `server/plan-schema.js`, `server/temporal-grounding.js`, and `server/nebius.js`; `nebius-check/check.mjs` records the earlier investigation. Require exact source excerpts for task support. Validate excerpts occur in the submitted notes and appointment strings occur in their task evidence. This is a useful guard, not a proof that all language is factually grounded; semantic examples are tested separately.
+
+`server/source-coverage.js` rejects omitted recognized explicit action clauses and clock-led appointments, including false no-action results. Exact task-local excerpts establish coverage. The final-review correction recognizes clause-start commas and coordinated actions, first-person request prefixes, and explicit object needs, while retaining commas inside object lists, names, and timing phrases. A need can quote its attached descriptive context or just the need; it cannot borrow another action clause as evidence. This conservative check can still miss unrecognized prose or ambiguous coordination and reject unsupported excerpt boundaries; it is not a general semantic completeness proof.
+
+The final-review prompt clarification in `server/nebius.js` contrasts mixed notes without fixed appointments with actual clock-led appointments. It keeps descriptive laundry context out of the task list, preserves stated needs and timing, and restricts the appointment-order caveat to real mixed timed/untimed cases. All generated results still pass the unchanged temporal and exact-excerpt validators.
 
 ### Browser Controller and Rendering
 Implements `prd.md > Notes and Plan Generation`, `Checklist Completion and Regeneration`, `Generation Failure and Recovery`, and `Approved Defaults`.
@@ -107,7 +111,7 @@ Browser saved data: `{ version: 1, notes, result: Result | null, completedTaskId
 Temporary data: loading flag, current error, confirmation intent, and active request identity; memory only. The server holds submitted notes only for the request and does not create a notes database or application history.
 
 ## File Structure
-Planned product files (not yet built):
+Implemented product files at Slice 3, plus the current documentation app map:
 
 ```text
 project/
@@ -124,19 +128,26 @@ project/
     plan-schema.js          # Schema and grounding instructions
     validate-plan.js        # Schema and consistency checks
     temporal-grounding.js   # Source checks for temporal claims
+    source-coverage.js      # Coverage of recognized explicit source actions
   tests/
     plan-validation.test.js # Bad output and no-action rules
     temporal-grounding.test.js # Exact callback and temporal-evidence regressions
     result-lifecycle.test.js# Replacement versus failure preservation
+    source-coverage.test.js # Explicit source-action omission regressions
+    storage.test.js         # Persistence and safe clearing
   scripts/
-    check-nebius.mjs        # Account lookup and explicit model smoke test
+    benchmark-nebius.mjs    # Explicit live production-settings benchmark
+    verify-lifecycle.mjs    # Deterministic browser lifecycle cases
+    verify-persistence.mjs  # Deterministic browser persistence cases
     verify-browser.mjs     # Dependency-free installed-Chrome verification
     check-temporal-regression.mjs # Explicit live callback regression
   devpost/
     scope.md                # Approved scope
     prd.md                  # Approved behavior
     spec.md                 # Approved technical blueprint
-    nebius-check/           # Small pre-build compatibility investigation
+    checklist.md            # Checkpoints and review status
+    app-map.html            # Offline code reference; final-review artifact
+    nebius-check/           # Historical investigation and account-check script
   .env                      # Local secret; ignored
   .env.example              # Blank key and verified model ID
   .gitignore
@@ -146,7 +157,7 @@ project/
   README.md                 # Local setup and demo instructions
 ```
 
-Course-provided folders remain in place. The pre-build investigation can inform the final script but is not the application implementation.
+Course-provided folders remain in place. The account lookup remains in `devpost/nebius-check/check.mjs`; current production checks use the scripts listed above. No separate `scripts/check-nebius.mjs` was created.
 
 ## External Services and Dependencies
 Nebius base URL: `https://api.tokenfactory.nebius.com/v1/`.
@@ -157,11 +168,13 @@ Nebius base URL: `https://api.tokenfactory.nebius.com/v1/`.
 
 [Structured output contract](https://docs.tokenfactory.nebius.com/ai-models-inference/json), [rate limits](https://docs.tokenfactory.nebius.com/ai-models-inference/rate-limits), [billing](https://docs.tokenfactory.nebius.com/other-capabilities/billing-new), [account pricing](https://tokenfactory.nebius.com/organization/prices).
 
-Selected model: `openai/gpt-oss-120b`, verified in the account catalog and through successful inference. Published base rates found in Nebius's indexed pricing page: $0.15/million input tokens and $0.60/million output tokens. Qwen's published comparison rates are $0.10/$0.30. The indexed price table was crawled five months earlier and the live page redirects to the account console; therefore these are planning estimates, not a verified account invoice or guaranteed current rate. [Pricing source](https://nebius.com/token-factory/prices). The learner's credit balance, expiration, and exact billing eligibility remain unverified; successful calls establish inference access only.
+Historical pre-build selection (superseded by Nemotron): `openai/gpt-oss-120b`, verified in the account catalog and through successful inference. Published base rates found in Nebius's indexed pricing page: $0.15/million input tokens and $0.60/million output tokens. Qwen's published comparison rates are $0.10/$0.30. The indexed price table was crawled five months earlier and the live page redirects to the account console; therefore these are planning estimates, not a verified account invoice or guaranteed current rate. [Pricing source](https://nebius.com/token-factory/prices). The learner's credit balance, expiration, and exact billing eligibility remain unverified; successful calls establish inference access only.
 
 No Tavily, search API, other AI provider, database, or hosting service. No concurrent generation is needed for this single-user local demo. Exact account rate limits are unknown; HTTP 429 follows the controlled failure path with manual retry.
 
 ## Model Compatibility Investigation
+
+Historical evidence: the current selection and accepted residual risk are recorded in **Slice 1 Recovery Checkpoint Update**. These older model prices are not Nemotron pricing.
 Completed on 2026-09-26 Pacific (reports use 2026-09-27 UTC):
 1. Learner enters the key locally; never request it in chat or print it.
 2. Query available model IDs. Start with `openai/gpt-oss-120b` only if present. Inspect account pricing and JSON/schema capability information to identify a lower-cost suitable candidate when available.
@@ -197,10 +210,10 @@ One same-origin server, one request endpoint, plain browser modules, and one sav
 ## Decisions and Open Issues
 Learner-approved: Node + Express, plain frontend, browser local storage, Nebius, protected local key, server-side output validation, no Node reinstall, and local demo with optional deployment.
 
-Learner uncertainty: which available low-cost model reliably follows the needed schema. The agreed investigation above resolves it with account evidence and real calls before selecting a model. This also illustrates how `prd.md > Supported Priority Counts and No-Action Results` becomes a data contract and a test.
+Learner uncertainty: which available low-cost model reliably follows the needed schema. The investigation and later Nemotron checkpoint established compatibility through real calls; semantic reliability remains limited by the observed samples and conservative validation. This also illustrates how `prd.md > Supported Priority Counts and No-Action Results` becomes a data contract and a test.
 
 Approved implementation choices: Ajv validation dependency, result fields, file boundaries, and request race handling. Product behavior stays governed by the approved PRD.
 
-Account access and model/schema compatibility are verified. The learner approved the complete blueprint, GPT-OSS selection, Ajv, the 6,000-character input bound, 4,096-token output cap, and a 15-second upstream timeout. No technical decision blocks build planning. Exact account charges and credit terms are not independently verified and must not be represented as confirmed.
+Account access and model/schema compatibility are verified. The learner approved the complete blueprint, current Nemotron selection (superseding GPT-OSS), Ajv, the 6,000-character input bound, 4,096-token output cap, and a 15-second upstream timeout. All three implementation slices are committed; final review and the targeted coverage/prompt correction are approved. Exact account charges and credit terms are not independently verified and must not be represented as confirmed.
 
-Nonblocking: final app name remains a working title. Exact package versions will be pinned in the build lockfile. The input bound needs a boundary case during build; current model tests used small realistic notes and do not establish long-input reliability.
+Nonblocking: final app name remains a working title. Dependency versions are pinned in the lockfile. Automated tests cover the input boundary; the live benchmark pads a short task to 6,000 characters and does not establish dense long-note reliability. A Slice 2 live browser run exposed supplies placed ahead of fixed appointments; this remains an ordering-quality limitation despite validation acceptance.

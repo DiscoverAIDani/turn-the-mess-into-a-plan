@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Messy notes to a clear next step — App map</title>
+<style>
+  :root{color-scheme:light;font-family:system-ui,sans-serif;color:#263d38;background:#f6f3eb;line-height:1.6}
+  *{box-sizing:border-box}body{margin:0}main{max-width:960px;margin:auto;padding:36px 24px 60px}
+  h1{font-size:clamp(1.9rem,5vw,3rem);line-height:1.15}h2{font-size:1.35rem;margin-top:32px}
+  .eyebrow{font-size:.85rem;letter-spacing:.08em;text-transform:uppercase}a{color:#205f57;text-underline-offset:3px}
+  a:focus-visible{outline:3px solid #955b24;outline-offset:4px}code{font-size:.9em;overflow-wrap:anywhere}
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0;list-style:none}
+  .flow li,section{background:#fffcf5;border:1px solid #cdd6cd;border-radius:14px;padding:18px}
+  .flow li:nth-child(2){background:#e7eee8}.flow strong{display:block}.flow p{margin-bottom:0}
+  .note{border-left:4px solid #a87847;padding-left:16px}li{margin-bottom:10px}small{display:block}
+  @media(max-width:640px){.flow{grid-template-columns:1fr}main{padding:24px 18px}section{padding:14px}}
+  @media print{body{background:white}main{max-width:none}section,.flow li{break-inside:avoid}}
+</style>
+<main>
+  <p class="eyebrow">Devpost project reference · Offline app map</p>
+  <h1>From messy notes to a clear next step</h1>
+  <p>A single-screen app turns supplied notes into a goal, up to three priorities, a checklist, and matters needing attention. The browser keeps current work; a local Express server asks Nemotron for a plan and validates the response.</p>
+  <p class="note">Source snapshot: <strong>325fa84</strong> (Slice 3), plus the approved final-review coverage and prompt correction included with this map. Prepared September 29, 2026. This reference can drift as code changes. Final whole-app review passed; this is a reference route, not a record of a completed hands-on tour.</p>
+
+  <h2>One action: make a replacement plan</h2>
+  <ol class="flow" aria-label="Replacement plan flow">
+    <li><strong>1 → Request</strong><code>public/app.js · makePlan / generate</code><p>Check input and confirm when tasks are completed. Send notes to <code>POST /api/plan</code>; retain current work while waiting.</p></li>
+    <li><strong>2 → Generate and validate</strong><code>server/nebius.js · generatePlan</code><p>Nebius runs <code>nvidia/Nemotron-3_5-Lightning</code> with thinking disabled and a 15-second timeout. <code>validatePlan</code> checks structure, grounding, and source-action coverage.</p></li>
+    <li><strong>3 → Replace or preserve</strong><code>public/plan-state.js · accept / fail</code><p>A valid plan or no-action result replaces the old result and resets checks. Failure preserves work. <code>renderWork</code> displays success; <code>saveWork</code> saves it locally.</p></li>
+  </ol>
+  <p>Browser storage: <code>public/storage.js · createStorage</code> uses only <code>messy-plan:v1</code>. Confirmed Start Over invalidates pending requests and removes that entry. Temporary errors, loading, and dialogs are not saved.</p>
+
+  <section aria-labelledby="route">
+    <h2 id="route">Three stops in the code</h2>
+    <ol>
+      <li><a href="../public/app.js"><code>public/app.js</code></a> — search <code>async function generate</code>. Follow the success path into <code>work.accept</code>, rendering, and saving; compare the catch path into <code>work.fail</code>.</li>
+      <li><a href="../public/plan-state.js"><code>public/plan-state.js</code></a> — search <code>accept(id, result)</code> and <code>fail(id)</code>. Only acceptance replaces the result and clears completion. Request identity rejects stale responses.</li>
+      <li><a href="../tests/result-lifecycle.test.js"><code>tests/result-lifecycle.test.js</code></a> — find <code>valid no-action replacement removes the plan and its completion</code> and <code>failure preserves the exact previous plan and completion for manual retry</code>. These tests encode the two different outcomes.</li>
+    </ol>
+  </section>
+
+  <h2>To change this, start here</h2>
+  <ul>
+    <li>Screen layout and styling: <a href="../public/index.html"><code>public/index.html</code></a> and <a href="../public/styles.css"><code>public/styles.css</code></a>. Result text rendering: <a href="../public/render.js"><code>renderResult</code></a>.</li>
+    <li>Save, restore, or clear behavior: <a href="../public/storage.js"><code>createStorage</code></a>, coordinated by <code>saveWork</code> and the clear handler in <code>public/app.js</code>.</li>
+    <li>Response acceptance rules: <a href="../server/validate-plan.js"><code>validatePlan</code></a>, <a href="../server/temporal-grounding.js"><code>hasGroundedTemporalLanguage</code></a>, and <a href="../server/source-coverage.js"><code>hasExplicitSourceCoverage</code></a>. Coverage now recognizes coordinated action clauses; the prompt contrasts descriptive context with explicit actions and actual appointments. Temporal and exact-excerpt checks remain unchanged.</li>
+  </ul>
+
+  <section aria-labelledby="practice">
+    <h2 id="practice">A practice to reuse</h2>
+    <p>Write down what must change and what must survive before implementing a state transition. Here, the <a href="prd.md">PRD</a> distinguishes a valid no-action replacement from a failed request. The lifecycle tests above make that distinction observable, while <a href="../tests/storage.test.js"><code>tests/storage.test.js</code></a> checks that saved work follows it. Use the same approach for another app's save, retry, or reset behavior.</p>
+    <p>Passing deterministic checks verifies these programmed rules. It does not establish universal model accuracy: recurrence rejection, occasional poor ordering, and conservative source coverage remain documented limitations.</p>
+  </section>
+
+  <h2>Run and revisit</h2>
+  <p>From the project folder, install dependencies with <code>npm.cmd install</code> if needed. Copy the blank-key <code>.env.example</code> to local <code>.env</code> only if it does not exist, and enter your own Nebius key locally. Keep the configured Nemotron model. Run <code>npm.cmd start</code>, then open <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a>. New generation needs internet and usable credits.</p>
+  <p>Existing checks: <code>npm.cmd test</code> and <code>node --env-file=.env scripts/verify-browser.mjs --lifecycle-only</code>. The latter uses installed Chrome with simulated results and makes no provider calls.</p>
+  <p>Reopen this guide by opening <code>devpost/app-map.html</code> in a browser. The guide needs no server, scripts, fonts, or network access; repository links work from the local checkout. See the <a href="../README.md">README</a> for setup and <a href="checklist.md">checklist</a> for review status.</p>
+</main>
+</html>

@@ -9,7 +9,7 @@ Build mode: learn. Keep explanations concise and practical, connect each step to
 
 Git initialized with the learner's agreement. Preserve existing course material; stage only reviewed project files. Verify `.env` and `/devpost/learner-profile.md` are ignored and untracked before commits. No real key belongs in `.env.example`.
 
-Current checkpoint: Slice 2 is committed at cbdb06db5a99acc738c396ac08044e73c4f7fbe0. Slice 3 persistence and confirmed Start Over are implemented and await final hands-on review; do not commit yet. Full automated suite: 40/40 passed. Deterministic browser lifecycle plus persistence passed, and a focused persistence follow-up passed refresh-during-generation as well. Screenshots checked on desktop/mobile. Notes, latest valid result, and checked task IDs use the single versioned messy-plan:v1 localStorage entry. Failed generation preserves saved progress; valid no-action replaces it. Confirmed clear removes only this entry, aborts/invalidate requests, and clears current work. Corrupt/unavailable storage is handled with calm notices; no temporary loading/error/dialog state is restored. All server files, Nemotron configuration, grounding/source coverage, dependencies, key, and timeout remain unchanged. No live benchmarks or unrelated model tests rerun. Stop for learner review before the Slice 3 checkpoint.
+Current checkpoint: all three approved slices are committed: Slice 1 `15b94e1`, Slice 2 `cbdb06d`, Slice 3 `325fa84`. Slice-specific hands-on approval is recorded below and in the commits. Final whole-app review and the targeted correction are approved. The learning wrap-up remains pending and is outside this commit-only request. The approved 2026-09-29 follow-up covers existing checks, checkpoint-documentation cleanup, an offline app map, and final review only. The learner explicitly authorized the reviewed-file audit and final recovery commit; stop immediately afterward. Preserve Nemotron, the approved targeted prompt/coverage correction, all remaining validators, lifecycle behavior, persistence, UI, and the 15-second upstream timeout.
 
 ## Slices
 
@@ -46,27 +46,30 @@ Current checkpoint: Slice 2 is committed at cbdb06db5a99acc738c396ac08044e73c4f7
 ## Hands-on Checkpoints
 
 - [x] Early usable behavior explored — after slice 1; learner reports on usefulness and visual feel before remaining slices.
-- [ ] Final kick-the-tires exploration and feedback completed — after slice 3; explore the complete journey and awkward inputs.
+- [x] Final kick-the-tires exploration and feedback completed — after slice 3; explore the complete journey and awkward inputs.
 
 Learn mode adds the learner check after each slice. Fast mode retains the early and final checkpoints with less code discussion.
 
 ## Final Review
 
-- [ ] Final review complete — feedback resolved and learner confirms ready to ship
+- [x] Messy-note correction retried and approved by the learner: coordinated action coverage, context preservation, conditional appointment caveat.
+- [x] Final review complete — feedback resolved and learner confirms ready to ship
 
 ## Code Tour and App Map
 
 - [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
 - [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: Not started. Planned focus: trace the approved distinction between valid no-action replacement and failure preservation from PRD to validation, browser behavior, and a meaningful test.
-Route and stops: Select 2–3 actual code locations after implementation.
-Edit outcome: Not offered yet.
+Activity and evidence: Reference map prepared and linked for review; learning activity remains pending until after final feedback. Planned focus: trace the approved distinction between valid no-action replacement and failure preservation from PRD to validation, browser behavior, and a meaningful test.
+Route and stops: Reference route in the app map: `public/app.js > generate`, `public/plan-state.js > accept / fail`, and the no-action/failure tests in `tests/result-lifecycle.test.js`. Not toured interactively.
+Edit outcome: Not applicable in this review: the learner explicitly requested preservation of the current UI and behavior.
 Reflection: Not offered yet; personal answer belongs only in the ignored profile.
 Activity mode: Not started.
 
 ## Revisions
+
+Historical entries below describe the state when recorded. Later approvals and the current checkpoint supersede earlier commit holds; they are not outstanding instructions.
 
 - Windows PowerShell blocks the npm.ps1 launcher; use npm.cmd commands without changing system policy.
 - Browser-control runtime could not start, and a detached command-runner server stopped between tool calls. Added a dependency-free installed-Chrome verification script that runs its own server and saves ignored screenshots; no application dependencies changed.
@@ -96,4 +99,15 @@ Activity mode: Not started.
 - Slice 3 approval: learner confirmed persistence across refresh for plan, edited notes, and completed-task state; Cancel Start Over preserves work; confirmed Start Over clears saved work and stays cleared after refresh. Learner explicitly authorized the staged credential/privacy audit and Slice 3 recovery commit. Stop immediately after committing.
 
 - Slice 3 implementation: added `public/storage.js` with shape validation and guarded access to one localStorage entry. `public/app.js` saves on note edits, task toggles, and valid generation success, restores on load, and implements the native confirmed Start Over dialog. `PlanState.clear()` invalidates request identity before aborting; late responses cannot restore cleared results or overwrite newer work. Storage removal failure clears the current visit but explicitly warns that saved work may return; never claims successful deletion.
-- Slice 3 verification: `npm.cmd test` passed 40/40; `node --env-file=.env scripts/verify-browser.mjs --lifecycle-only` passed both existing lifecycle and new persistence checks; focused `--persistence-only` follow-up passed refresh during generation without restoring loading. Browser cases cover refresh/return, edited notes with prior checked plan, failure preservation after refresh, no-action restore, Cancel/Escape, confirmed clear, late response after clear and newer generation, unrelated storage preservation, corrupted saved data, quota/read/removal failures, safe current-visit use, and desktop/mobile dialogs. No JavaScript exceptions. Hands-on approval and Slice 3 commit pending.
+- Slice 3 verification: `npm.cmd test` passed 40/40; `node --env-file=.env scripts/verify-browser.mjs --lifecycle-only` passed both existing lifecycle and new persistence checks; focused `--persistence-only` follow-up passed refresh during generation without restoring loading. Browser cases cover refresh/return, edited notes with prior checked plan, failure preservation after refresh, no-action restore, Cancel/Escape, confirmed clear, late response after clear and newer generation, unrelated storage preservation, corrupted saved data, quota/read/removal failures, safe current-visit use, and desktop/mobile dialogs. No JavaScript exceptions. Slice-specific hands-on approval was subsequently recorded; Slice 3 is committed at `325fa84`.
+
+- 2026-09-29 final-review verification: existing automated suite passed 40/40; existing deterministic browser lifecycle and persistence checks passed with no JavaScript exceptions, including desktop/mobile cases. Sandbox process restrictions required approved reruns outside the sandbox. No live provider calls or benchmarks rerun. Final whole-app learner review remains pending; no recovery commit authorized yet.
+
+- App map: `devpost/app-map.html` documents source checkpoint `325fa84`; local links and named source anchors verified. Headless Chrome rendered it offline with page scripts disabled at desktop and mobile widths; no overflow, keyboard link access passed, and both screenshots were visually inspected. Map linked to the learner; final review and learning activity are not marked complete.
+
+- Final-review concrete issue: the exact dentist/dog-food/birthday/laundry/email paragraph failed twice with HTTP 200 and schema-valid responses. Temporal validation rejected an inapplicable appointment caveat; source coverage independently treated the whole coordinated paragraph as one required excerpt. One response also changed excerpt capitalization. A controlled grounded fixture isolated the coverage defect.
+- Learner authorized a narrow coverage fix, prompt clarification, and regression verification. Coverage now splits recognized coordinated clauses at commas/and while retaining commas inside object lists, names, and timing phrases; recognizes explicit object needs and first-person request prefixes. Each recognized action still needs its own local evidence; whole-paragraph substitution, omitted actions, and altered excerpts remain rejected. Exact-excerpt and temporal validators are unchanged.
+- Prompt follow-up: initial clarification was insufficient in live output (false caveat, invented laundry action, lost visible Friday context). Added contrasting mixed-note and actual-appointment examples. The final prompt produced three passing exact messy-note results, two passing seven-task business results, and passing callback/context-only checks. Two intermediate business checks had an em-dash encoding error in the shell diagnostic input; corrected Unicode input passed twice. An earlier prompt candidate omitted appointments and was correctly rejected. These samples do not establish general reliability.
+- Final verification after retained changes: 44/44 automated tests passed; deterministic desktop/mobile lifecycle and persistence browser checks passed with no JavaScript exceptions. UI, persistence, lifecycle, model, timeout, temporal validation, and exact-excerpt validation remain unchanged. No staging or commit; stop for the learner to restart the server, retry the exact paragraph and business example, and review.
+
+- Final hands-on approval: learner confirmed the exact messy paragraph produces four actions, preserves Friday/next-week context, keeps laundry as context, and omits the inapplicable appointment caveat. The original business example retains all seven tasks and both 9:00 AM and 11:30 AM appointments. Learner approved the final-review slice and explicitly authorized the reviewed-file credential/privacy audit, selective staging, and final recovery commit. Stop immediately after the commit; no additional work authorized.
